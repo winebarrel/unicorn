@@ -32,6 +32,7 @@ class Unicorn::Configurator
   # Default settings for Unicorn
   DEFAULTS = {
     :timeout => 60,
+    :timeout_signal => "KILL",
     :logger => Logger.new($stderr),
     :worker_processes => 1,
     :after_fork => lambda { |server, worker|
@@ -191,6 +192,10 @@ class Unicorn::Configurator
     # POSIX says 31 days is the smallest allowed maximum timeout for select()
     max = 30 * 60 * 60 * 24
     set[:timeout] = seconds > max ? max : seconds
+  end
+
+  def timeout_signal(signal)
+    set[:timeout_signal] = signal
   end
 
   # sets the current number of worker_processes to +nr+.  Each worker

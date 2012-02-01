@@ -12,7 +12,7 @@ require "unicorn/ssl_server"
 # See Unicorn::Configurator for information on how to configure \Unicorn.
 class Unicorn::HttpServer
   # :stopdoc:
-  attr_accessor :app, :request, :timeout, :worker_processes,
+  attr_accessor :app, :request, :timeout, :timeout_signal, :worker_processes,
                 :before_fork, :after_fork, :before_exec,
                 :listener_opts, :preload_app,
                 :reexec_pid, :orig_app, :init_listeners,
@@ -456,8 +456,8 @@ class Unicorn::HttpServer
       end
       next_sleep = 0
       logger.error "worker=#{worker.nr} PID:#{wpid} timeout " \
-                   "(#{diff}s > #{@timeout}s), killing"
-      kill_worker(:KILL, wpid) # take no prisoners for timeout violations
+                   "(#{diff}s > #{@timeout}s), killing(#{@timeout_signal})"
+      kill_worker(@timeout_signal, wpid) # take no prisoners for timeout violations
     end
     next_sleep <= 0 ? 1 : next_sleep
   end
