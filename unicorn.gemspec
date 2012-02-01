@@ -13,7 +13,7 @@ end.compact
 Gem::Specification.new do |s|
   s.name = %q{unicorn}
   s.version = ENV["VERSION"].dup
-  s.authors = ["#{name} hackers"]
+  s.authors = ["#{s.name} hackers"]
   s.summary = <<-SUMMARY
 \Unicorn is an HTTP server for Rack applications designed to only serve
 fast clients on low-latency, high-bandwidth connections and take
