@@ -1,5 +1,5 @@
 # -*- encoding: binary -*-
-ENV["VERSION"] = "4.2.0"
+ENV["VERSION"] = "4.2.0.cookpad.0"
 ENV["VERSION"] or abort "VERSION= must be specified"
 manifest = File.readlines('.manifest').map! { |x| x.chomp! }
 
