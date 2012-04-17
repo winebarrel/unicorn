@@ -54,7 +54,7 @@ class Unicorn::HttpServer
   SIG_QUEUE = []
 
   # list of signals we care about and trap in master.
-  QUEUE_SIGS = [ :WINCH, :QUIT, :INT, :TERM, :USR1, :USR2, :HUP, :TTIN, :TTOU ]
+  QUEUE_SIGS = [ :WINCH, :QUIT, :INT, :TERM, :USR1, :USR2, :HUP, :TTIN, :TTOU, :IO ]
 
   # :startdoc:
   # We populate this at startup so we can figure out how to reexecute
@@ -305,6 +305,8 @@ class Unicorn::HttpServer
           logger.info "config_file not present, reexecuting binary"
           reexec
         end
+      when :IO
+        kill_fattest_worker(:QUIT)
       end
     rescue => e
       Unicorn.log_error(@logger, "master loop error", e)
@@ -639,6 +641,18 @@ class Unicorn::HttpServer
   # delivers a signal to each worker
   def kill_each_worker(signal)
     WORKERS.keys.each { |wpid| kill_worker(signal, wpid) }
+  end
+
+  def kill_fattest_worker(signal)
+    proc_rss = Hash[*`ps xo pid,rss`.split[2..-1].map(&:to_i)]
+
+    wpid, max_rss = WORKERS.keys.inject([nil, 0]) do |max, wpid|
+      rss = proc_rss[wpid] || 0
+      @logger.info "[#{wpid}] #{rss}"
+      rss > max[1] ? [wpid, rss] : max
+    end
+    @logger.info "Max VmRss=#{max_rss}, pid=#{wpid}"
+    kill_worker(signal, wpid) if wpid > 0
   end
 
   # unlinks a PID file at given +path+ if it contains the current PID
